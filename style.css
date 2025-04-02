@@ -41,7 +41,7 @@ main{
 }
 
 .field {
-    bottom: calc(var(--card-height)*1.5);
+    bottom: calc(var(--card-height)*1.75);
 }
 
 

@@ -22,52 +22,59 @@ const cardContainerElem = document.querySelector('.card-container')
     </div>
 </div>  */
 
-function createCard(gridPos){
-
+function createCard(gridPos) {
     const randomIndex = Math.floor(Math.random() * cardObjectDefinitions.length);
     const cardItem = cardObjectDefinitions[randomIndex];
 
-    // crear divs per fer una carta
-    const cardElem = createElement('div')
-    const cardInnerElem = createElement('div')
-    const cardFrontElem = createElement('div')
-    const cardBackElem = createElement('div')
+    // Crear divs per fer una carta
+    const cardElem = createElement('div');
+    const cardInnerElem = createElement('div');
+    const cardFrontElem = createElement('div');
+    const cardBackElem = createElement('div');
 
-    //crear les imatges de la cara de davant i darrere
-    const cardFrontImg = createElement('img')
-    const cardBackImg = createElement('img')
+    // Crear les imatges de la cara de davant i darrere
+    const cardFrontImg = createElement('img');
+    const cardBackImg = createElement('img');
 
-    //afegir classes i id
-    addClassToElement(cardElem, 'card')
-    addClassToElement(cardElem, cardItem.id) // ha de ser classe per que es pot repetir una mateixa carta
+    // Afegir classes i id
+    addClassToElement(cardElem, 'card');
+    addClassToElement(cardElem, cardItem.id); // Ha de ser classe perquè es pot repetir una mateixa carta
 
-    addClassToElement(cardInnerElem, 'card-inner')
-    addClassToElement(cardFrontElem, 'card-front')
-    addClassToElement(cardBackElem, 'card-back')
+    addClassToElement(cardInnerElem, 'card-inner');
+    addClassToElement(cardFrontElem, 'card-front');
+    addClassToElement(cardBackElem, 'card-back');
 
-    //afegir rutes a les imatges i classes
-    addSrcToImageElem(cardBackImg, cardBackImgPath)
-    addSrcToImageElem(cardFrontImg, cardItem.imagePath)
-    addClassToElement(cardBackImg, 'card-img')
-    addClassToElement(cardFrontImg, 'card-img')
+    // Afegir rutes a les imatges i classes
+    addSrcToImageElem(cardBackImg, cardBackImgPath);
+    addSrcToImageElem(cardFrontImg, cardItem.imagePath);
+    addClassToElement(cardBackImg, 'card-img');
+    addClassToElement(cardFrontImg, 'card-img');
+
+    // Definir la funció del listener
+    const onClickListener = () => {
+        moveToField(cardElem);
+        cardFrontImg.removeEventListener('click', onClickListener); // Eliminar el listener després de moure la carta
+        let gridPosNumber = getGridPosNumber(gridPos); // Obtenir el número de la posició de la carta
+        createCard(gridPosNumber); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
+        console.log(gridPosNumber); // Obtenir l'id de la carta des de la classe
+        console.log(gridPos); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
+
+
+    };
 
     // Afegir un onclick listener a la imatge de la cara frontal
-    cardFrontImg.addEventListener('click', () => {
-        moveToField(cardElem);
-    });
+    cardFrontImg.addEventListener('click', onClickListener);
 
-    //afegir com a fills les imatges als contenidors que toca
-    addChildElement(cardBackElem,cardBackImg)
-    addChildElement(cardFrontElem,cardFrontImg)
-    //afegir els contenidors amb els seus pares
-    addChildElement(cardInnerElem, cardFrontElem)
-    addChildElement(cardInnerElem, cardBackElem)
-    addChildElement(cardElem, cardInnerElem)
+    // Afegir com a fills les imatges als contenidors que toca
+    addChildElement(cardBackElem, cardBackImg);
+    addChildElement(cardFrontElem, cardFrontImg);
+    addChildElement(cardInnerElem, cardFrontElem);
+    addChildElement(cardInnerElem, cardBackElem);
+    addChildElement(cardElem, cardInnerElem);
 
-    //afegir la carta a la seva zona corresponent
-    gridPos=document.querySelector('.card-pos-'+gridPos)
-    addChildElement(gridPos, cardElem)
-
+    // Afegir la carta a la seva zona corresponent
+    gridPos = document.querySelector('.card-pos-' + gridPos);
+    addChildElement(gridPos, cardElem);
 }
 
 function createElement(elemType){
@@ -98,15 +105,57 @@ function gameStart(){
 }
 // Funció per moure una carta al contenidor field
 function moveToField(cardElem) {
+    // Obtenir l'id de la carta des de la classe
     const cardId = Array.from(cardElem.classList).find(cls => !isNaN(cls)); // Busca una classe que sigui un número
+
+    if (!cardId) {
+        console.error('No s\'ha trobat cap id vàlid a les classes de la carta.');
+        return;
+    }
+
     // Construir dinàmicament la query per seleccionar el contenidor corresponent
     const fieldContainer = document.querySelector(`.field .card-pos-${cardId}`);
     if (fieldContainer) {
+        // Comptar quantes cartes ja hi ha al contenidor
+        const existingCards = fieldContainer.querySelectorAll('.card').length;
+
+        // Ajustar la posició de la nova carta
+        cardElem.style.position = 'absolute';
+        cardElem.style.top = `${existingCards * 20}px`; // Desplaça 20px per cada carta existent
+
+        // Afegir la carta al contenidor
         fieldContainer.appendChild(cardElem);
-        console.log(`Carta amb id ${cardId} moguda al contenidor card-pos-${cardId}.`);
+
+        // Eliminar l'`onclick` de la carta
+        const cardFrontImg = cardElem.querySelector('.card-front img');
+        if (cardFrontImg) {
+            cardFrontImg.onclick = null; // Elimina l'`onclick`
+        }
+
+        console.log(`Carta amb id ${cardId} moguda al contenidor field card-pos-${cardId}.`);
     } else {
         console.error(`No s'ha trobat el contenidor .field .card-pos-${cardId}`);
     }
 }
+
+function getGridPosNumber(element) {
+    // Buscar una classe que coincideixi amb el patró "card-pos-X"
+    const gridPosClass = Array.from(element.classList).find(cls => cls.startsWith('card-pos-'));
+
+    if (gridPosClass) {
+        // Extreure el número de la classe "card-pos-X"
+        const gridPosNumber = gridPosClass.split('-')[2]; // Agafa la part després del segon guió
+        return parseInt(gridPosNumber, 10); // Converteix a número
+    }
+
+    console.error('No s\'ha trobat cap classe amb el patró "card-pos-X".');
+    return null;
+}
+
+// Exemple d'ús
+const gridPosElement = document.querySelector('.card-pos-3');
+const gridPosNumber = getGridPosNumber(gridPosElement);
+console.log(gridPosNumber); // Mostra "3"
+
 
 gameStart()
