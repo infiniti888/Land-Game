@@ -1,33 +1,48 @@
+/*variables CSS*/
 :root{
-    --card-width:112px;
-    --card-height:156px;
+    --card-width:56px;
+    --card-height:78px;
     --num-cards:5;
-    --card-horizontal-space: 112px;
-    --main-margin:30px;
-}
-body{
-    height: 100vh;
+    --card-horizontal-space: 56px;
+    --main-margin:15px;
 }
 
-main{
-    height: 250px;
-    display: flex;
-    justify-content: center;
-    border: 1px solid black;
+
+body, html {
+    height: 100%;
+    overflow: hidden; /* Evita el scroll */
 }
 
-/* .card-container{
-    margin-top: 30px;
-    position: relative;
-    width: calc((var(--card-width) * var(--num-cards) / 2) + var(--card-horizontal-space));
-    display: grid;
-    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
-    grid-template-areas: "1 2 3 4 5";
-    border: 1px solid black;
-} */
+
+
+.handPC, .hand {
+    height: var(--card-height);
+    background-color: #f0f0f0; 
+}
+
+.fieldPC, .field {
+    height: 30%;
+    width: calc(var(--num-cards) * var(--card-width)); /* Amplada del camp del jugador */
+    background-color: #e0e0e0; 
+}
+
+.field {
+    background-color: #d0d0d0; 
+    position: absolute;
+    bottom: calc(var(--card-height)); /* Col·loca el camp del jugador sobre la mà */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hand {
+    background-color: #c0c0c0; 
+    position: absolute;
+    bottom: 0; /* Col·loca la mà del jugador a la part inferior */
+    left: 50%;
+    transform: translateX(-50%);
+}
 
 .card-container {
-    margin-top: 30px;
     position: absolute;
     display: flex; 
     flex-direction: row; 
@@ -36,47 +51,28 @@ main{
     gap: var(--card-horizontal-space); /* Espai entre les cartes  */
 }
 
-.hand{
-    bottom: var(--card-height);
+.handPC {
+    position: absolute;
+    top: 0; /* Col·loca la mà de la màquina a la part superior */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
-.field {
-    bottom: calc(var(--card-height)*1.75);
+.fieldPC {
+    position: absolute;
+    top: calc(var(--card-height)); /* Col·loca el camp de la màquina sota la mà del PC*/
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 
-.card-pos-1{
-    grid-area: 1;
-    border: 1px solid black;
-    background-color: yellow;
-}
-.card-pos-2{
-    grid-area: 2;
-    border: 1px solid black;
-    background-color: blue;
-}
-.card-pos-3{
-    grid-area: 3;
-    border: 1px solid black;
-    background-color: green;
-}
-.card-pos-4{
-    grid-area: 4;
-    border: 1px solid black;
-    background-color: red;
-}
-.card-pos-5{
-    grid-area: 5;
-    border: 1px solid black;
-    background-color: black;
-}
 .card{
     position: absolute;
     height: var(--card-height);
     width: var(--card-width);
     perspective: 1000px;
     cursor: pointer;
-
+    bottom: 0;/* Col·loca les cartes a la part inferior del div */
 }
 
 .card-inner{
@@ -98,7 +94,6 @@ main{
 
 .card-img{
     height: 100%;
-
 }
 
 .card-back{

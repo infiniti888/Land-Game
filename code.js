@@ -22,7 +22,7 @@ const cardContainerElem = document.querySelector('.card-container')
     </div>
 </div>  */
 
-function createCard(gridPos) {
+function createCard(gridPos, isPlayer=true) {
     const randomIndex = Math.floor(Math.random() * cardObjectDefinitions.length);
     const cardItem = cardObjectDefinitions[randomIndex];
 
@@ -50,21 +50,9 @@ function createCard(gridPos) {
     addClassToElement(cardBackImg, 'card-img');
     addClassToElement(cardFrontImg, 'card-img');
 
-    // Definir la funció del listener
-    const onClickListener = () => {
-        moveToField(cardElem);
-        cardFrontImg.removeEventListener('click', onClickListener); // Eliminar el listener després de moure la carta
-        let gridPosNumber = getGridPosNumber(gridPos); // Obtenir el número de la posició de la carta
-        createCard(gridPosNumber); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
-        console.log(gridPosNumber); // Obtenir l'id de la carta des de la classe
-        console.log(gridPos); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
 
 
-    };
-
-    // Afegir un onclick listener a la imatge de la cara frontal
-    cardFrontImg.addEventListener('click', onClickListener);
-
+  
     // Afegir com a fills les imatges als contenidors que toca
     addChildElement(cardBackElem, cardBackImg);
     addChildElement(cardFrontElem, cardFrontImg);
@@ -72,9 +60,28 @@ function createCard(gridPos) {
     addChildElement(cardInnerElem, cardBackElem);
     addChildElement(cardElem, cardInnerElem);
 
+    if(isPlayer) {
+    // Definir la funció del listener
+    const onClickListener = () => {
+        moveToField(cardElem);
+        cardFrontImg.removeEventListener('click', onClickListener); // Eliminar el listener després de moure la carta
+        let gridPosNumber = getGridPosNumber(gridPos); // Obtenir el número de la posició de la carta
+        createCard(gridPosNumber, true); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
+        //cardElem.style.zIndex = -1; // Moure la carta perquè estigui darrere de la de la mà, no cal si nomes hi ha 5 cartes
+        WinCheck(); // Comprovar si s'ha guanyat
+    };
+    // Afegir un onclick listener a la imatge de la cara frontal
+    cardFrontImg.addEventListener('click', onClickListener);
+
     // Afegir la carta a la seva zona corresponent
-    gridPos = document.querySelector('.card-pos-' + gridPos);
+    gridPos = document.querySelector('.hand .card-pos-' + gridPos);
     addChildElement(gridPos, cardElem);
+    }
+    else {
+        // Afegir la carta a la seva zona corresponent
+        gridPos = document.querySelector('.handPC .card-pos-' + gridPos);
+        addChildElement(gridPos, cardElem);
+    }
 }
 
 function createElement(elemType){
@@ -100,7 +107,7 @@ function addChildElement(parentElem, childElem){
 function gameStart(){
     // afegir les 4 cartes de la mà inicial
     for (let i = 1; i <= 4; i++){
-        createCard(i)
+        createCard(i, true)
     }
 }
 // Funció per moure una carta al contenidor field
@@ -127,7 +134,7 @@ function moveToField(cardElem) {
         fieldContainer.appendChild(cardElem);
 
         // Eliminar l'`onclick` de la carta
-        const cardFrontImg = cardElem.querySelector('.card-front img');
+        const cardFrontImg = cardElem.querySelector('.hand .card-front img');
         if (cardFrontImg) {
             cardFrontImg.onclick = null; // Elimina l'`onclick`
         }
@@ -152,10 +159,30 @@ function getGridPosNumber(element) {
     return null;
 }
 
-// Exemple d'ús
-const gridPosElement = document.querySelector('.card-pos-3');
-const gridPosNumber = getGridPosNumber(gridPosElement);
-console.log(gridPosNumber); // Mostra "3"
+// Funció per comprovar si s'ha guanyat (es comprova cada vegada que es mou una carta)
+// Hi ha dues maneres de guanyar:
+// 1. Si un contenidor té 5 cartes (guanyes)
+// 2. Si tots els contenidors tenen almenys una carta (guanyes)
+function WinCheck() {
+    // Iterar pels contenidors de field (del 1 al 5)
+    for (let i = 1; i <= 5; i++) {
+        const fieldContainer = document.querySelector(`.field .card-pos-${i}`);
+
+        if (!fieldContainer || fieldContainer.children.length === 0) {
+            console.log(`El contenidor card-pos-${i} està buit.`);
+            return false; // Si un contenidor està buit, no hi ha victòria
+        }
+
+        if(fieldContainer.children.length === 5) {
+            console.log(`El contenidor card-pos-${i} té 5 cartes. Has guanyat!`);
+            return true; // Si un contenidor té 5 cartes, hi ha victòria
+        }
+    }
+
+    console.log('Tots els contenidors tenen almenys una carta. Has guanyat!');
+    return true; // Si tots els contenidors tenen almenys una carta, hi ha victòria
+}
+
 
 
 gameStart()
