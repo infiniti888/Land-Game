@@ -20,6 +20,13 @@ body, html {
     background-color: #f0f0f0; 
 }
 
+/* Estil per a posicionar les cartes del camp del jugador i del PC */
+.field .card-pos-1,.field .card-pos-2, .field .card-pos-3,.field .card-pos-4,.field .card-pos-5,
+.fieldPC .card-pos-1,.fieldPC .card-pos-2, .fieldPC .card-pos-3,.fieldPC .card-pos-4,.fieldPC .card-pos-5{
+    position: relative;
+    left: -28px; /* Col·loca la carta mitja carta més a l'esquerra, ben enquadrada*/
+}
+
 .fieldPC, .field {
     height: 30%;
     width: calc(var(--num-cards) * var(--card-width)); /* Amplada del camp del jugador */

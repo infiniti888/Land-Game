@@ -9,19 +9,6 @@ const cardBackImgPath = './images/card_back.jpg'
 
 const cardContainerElem = document.querySelector('.card-container')
 
-
-/* Exemple de l'estructura d'una carta
-<div class="card">
-    <div class="card-inner">
-        <div class="card-front">
-            <img src="./images/plains.jpg" alt="" class="card-img">
-        </div>
-        <div class="card-back">
-            <img src="./images/card_back.jpg" alt="" class="card-img">
-        </div>
-    </div>
-</div>  */
-
 function createCard(gridPos, isPlayer=true) {
     const randomIndex = Math.floor(Math.random() * cardObjectDefinitions.length);
     const cardItem = cardObjectDefinitions[randomIndex];
@@ -63,12 +50,14 @@ function createCard(gridPos, isPlayer=true) {
     if(isPlayer) {
     // Definir la funció del listener
     const onClickListener = () => {
-        moveToField(cardElem);
+        moveToField(cardElem, true);
         cardFrontImg.removeEventListener('click', onClickListener); // Eliminar el listener després de moure la carta
         let gridPosNumber = getGridPosNumber(gridPos); // Obtenir el número de la posició de la carta
         createCard(gridPosNumber, true); // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
         //cardElem.style.zIndex = -1; // Moure la carta perquè estigui darrere de la de la mà, no cal si nomes hi ha 5 cartes
         WinCheck(); // Comprovar si s'ha guanyat
+        tornPC(); // Juga la màquina després de moure la carta del jugador
+
     };
     // Afegir un onclick listener a la imatge de la cara frontal
     cardFrontImg.addEventListener('click', onClickListener);
@@ -81,6 +70,8 @@ function createCard(gridPos, isPlayer=true) {
         // Afegir la carta a la seva zona corresponent
         gridPos = document.querySelector('.handPC .card-pos-' + gridPos);
         addChildElement(gridPos, cardElem);
+        cardElem.style.transform= 'rotateY(0deg)'; /* La cara de davant està visible */
+        cardInnerElem.style.transform = 'rotateY(180deg)'; /* La cara de darrere està visible */
     }
 }
 
@@ -108,10 +99,12 @@ function gameStart(){
     // afegir les 4 cartes de la mà inicial
     for (let i = 1; i <= 4; i++){
         createCard(i, true)
+        createCard(i, false)
+
     }
 }
 // Funció per moure una carta al contenidor field
-function moveToField(cardElem) {
+function moveToField(cardElem, isPlayer=true) {
     // Obtenir l'id de la carta des de la classe
     const cardId = Array.from(cardElem.classList).find(cls => !isNaN(cls)); // Busca una classe que sigui un número
 
@@ -120,6 +113,7 @@ function moveToField(cardElem) {
         return;
     }
 
+    if(isPlayer) {
     // Construir dinàmicament la query per seleccionar el contenidor corresponent
     const fieldContainer = document.querySelector(`.field .card-pos-${cardId}`);
     if (fieldContainer) {
@@ -142,6 +136,30 @@ function moveToField(cardElem) {
         console.log(`Carta amb id ${cardId} moguda al contenidor field card-pos-${cardId}.`);
     } else {
         console.error(`No s'ha trobat el contenidor .field .card-pos-${cardId}`);
+    }
+    }
+    else {
+        // Construir dinàmicament la query per seleccionar el contenidor corresponent
+        const fieldContainer = document.querySelector(`.fieldPC .card-pos-${cardId}`);
+        if (fieldContainer) {
+            // Comptar quantes cartes ja hi ha al contenidor
+            const existingCards = fieldContainer.querySelectorAll('.card').length;
+
+            // Ajustar la posició de la nova carta
+            cardElem.style.position = 'absolute';
+            cardElem.style.top = `${existingCards * 20}px`; // Desplaça 20px per cada carta existent
+
+            // Afegir la carta al contenidor
+            fieldContainer.appendChild(cardElem);
+            // Eliminar l'`onclick` de la carta
+            const cardFrontImg = cardElem.querySelector('.hand .card-front img');
+            if (cardFrontImg) {
+                cardFrontImg.onclick = null; // Elimina l'`onclick`
+            }
+            console.log(`Carta amb id ${cardId} moguda al contenidor fieldPC card-pos-${cardId}.`);
+        } else {
+            console.error(`No s'ha trobat el contenidor .fieldPC .card-pos-${cardId}`);
+        }
     }
 }
 
@@ -183,6 +201,35 @@ function WinCheck() {
     return true; // Si tots els contenidors tenen almenys una carta, hi ha victòria
 }
 
+function tornPC() {
+    const handPCContainer = document.querySelector('.handPC');
 
+    // Obtenir totes les cartes disponibles a la mà de la màquina
+    const availableCards = Array.from(handPCContainer.querySelectorAll('.card'));
+
+    if (availableCards.length === 0) {
+        console.error('No hi ha cartes disponibles a la mà de la màquina.');
+        return;
+    }
+
+    // Seleccionar una carta aleatòria
+    const randomIndex = Math.floor(Math.random() * availableCards.length);
+    const cardItem = availableCards[randomIndex];
+
+    if (!cardItem) {
+        console.error('No s\'ha trobat cap carta vàlida.');
+        return;
+    }
+
+    // Moure la carta al contenidor fieldPC
+    moveToField(cardItem, false);
+    const cardInnerElem = cardItem.querySelector('.card-inner');
+    cardInnerElem.style.transform = 'rotateY(0deg)'; /* La cara de darrere està visible */
+    
+
+    // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
+    const gridPosNumber = getGridPosNumber(cardItem.parentElement); // Obtenir la posició de la carta
+    createCard(gridPosNumber, false);
+}
 
 gameStart()
