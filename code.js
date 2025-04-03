@@ -133,7 +133,7 @@ function moveToField(cardElem, isPlayer=true) {
             cardFrontImg.onclick = null; // Elimina l'`onclick`
         }
 
-        console.log(`Carta amb id ${cardId} moguda al contenidor field card-pos-${cardId}.`);
+        // console.log(`Carta amb id ${cardId} moguda al contenidor field card-pos-${cardId}.`);
     } else {
         console.error(`No s'ha trobat el contenidor .field .card-pos-${cardId}`);
     }
@@ -156,7 +156,7 @@ function moveToField(cardElem, isPlayer=true) {
             if (cardFrontImg) {
                 cardFrontImg.onclick = null; // Elimina l'`onclick`
             }
-            console.log(`Carta amb id ${cardId} moguda al contenidor fieldPC card-pos-${cardId}.`);
+            // console.log(`Carta amb id ${cardId} moguda al contenidor fieldPC card-pos-${cardId}.`);
         } else {
             console.error(`No s'ha trobat el contenidor .fieldPC .card-pos-${cardId}`);
         }
@@ -187,7 +187,6 @@ function WinCheck() {
         const fieldContainer = document.querySelector(`.field .card-pos-${i}`);
 
         if (!fieldContainer || fieldContainer.children.length === 0) {
-            console.log(`El contenidor card-pos-${i} està buit.`);
             return false; // Si un contenidor està buit, no hi ha victòria
         }
 
@@ -211,11 +210,13 @@ function tornPC() {
         console.error('No hi ha cartes disponibles a la mà de la màquina.');
         return;
     }
-
     // Seleccionar una carta aleatòria
     const randomIndex = Math.floor(Math.random() * availableCards.length);
     const cardItem = availableCards[randomIndex];
+    const parentElement = cardItem.parentElement; // Obtenir el contenidor on està la carta, allà indica la posició
+    const cardposition = getGridPosNumber(parentElement); // Obtenir la posició de la carta
 
+    
     if (!cardItem) {
         console.error('No s\'ha trobat cap carta vàlida.');
         return;
@@ -228,8 +229,7 @@ function tornPC() {
     
 
     // Crear una nova carta a la mà inicial per substituir la que s'ha mogut
-    const gridPosNumber = getGridPosNumber(cardItem.parentElement); // Obtenir la posició de la carta
-    createCard(gridPosNumber, false);
+    createCard(cardposition, isPlayer=false);
 }
 
 gameStart()
